@@ -1,4 +1,4 @@
-/target/
+target/
 .idea/
 .vscode/
 .settings
@@ -12,3 +12,13 @@
 node_modules/
 src/main/frontend/generated/
 vite.generated.ts
+
+# Config local de Claude/MCP
+.mcp.json
+
+# Variables de entorno / secretos
+.env
+.env.local
+
+# Logs
+*.log

@@ -1,24 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <!-- Project from https://start.vaadin.com/56a9567f-627d-4f85-be5e-2f175382cc17 -->
-    <groupId>utn.frp.comp03</groupId>
-    <artifactId>terceros-hilla</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
-    
-    <properties>
-        <java.version>21</java.version>
-        <vaadin.version>25.1.8</vaadin.version>
-    </properties>
-    
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.7</version>
+        <version>3.2.5</version>
         <relativePath/>
     </parent>
-    
+
+    <groupId>utn.frp.comp03</groupId>
+    <artifactId>terceros-hilla</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+
+    <properties>
+        <java.version>21</java.version>
+        <!-- Esquema unificado: ya no se usa hilla.version + hilla-bom -->
+        <vaadin.version>24.5.5</vaadin.version>
+    </properties>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -30,41 +33,60 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    
+
     <dependencies>
+        <!-- Spring Boot -->
         <dependency>
-            <groupId>com.vaadin</groupId>
-            <!-- Replace artifactId with vaadin-core to use only free components -->
-            <artifactId>vaadin</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-dev</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
+
+        <!-- PostgreSQL -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Vaadin + Hilla (React) -->
+        <!-- En la línea 24.x, vaadin-spring-boot-starter ya incluye Hilla -->
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring-boot-starter</artifactId>
         </dependency>
         <dependency>
+    <groupId>com.vaadin</groupId>
+    <artifactId>vaadin-spring</artifactId>
+</dependency>
+
+        <!-- Test -->
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>browserless-test-junit6</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
-    
+
     <build>
-        <defaultGoal>spring-boot:run</defaultGoal>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+            <!-- En modo desarrollo (sin -Pproduction) solo preparamos el
+                 frontend; Vaadin levanta el server de Vite con HMR y, lo más
+                 importante para debug, muestra los errores de React en un
+                 overlay en el navegador en vez de tragárselos. -->
             <plugin>
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-maven-plugin</artifactId>
@@ -72,26 +94,38 @@
                 <executions>
                     <execution>
                         <goals>
-                            <goal>build-frontend</goal>
+                            <goal>prepare-frontend</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
-    
-    <repositories>
-        <repository>
-            <id>central</id>
-            <url>https://repo.maven.apache.org/maven2</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>vaadin-directory</id>
-            <url>https://maven.vaadin.com/vaadin-addons</url>
-        </repository>
-    </repositories>
-    
+
+    <profiles>
+        <!-- Activar solo para builds de producción reales:
+             mvn clean package -Pproduction -->
+        <profile>
+            <id>production</id>
+            <properties>
+                <vaadin.productionMode>true</vaadin.productionMode>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.vaadin</groupId>
+                        <artifactId>vaadin-maven-plugin</artifactId>
+                        <version>${vaadin.version}</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>build-frontend</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
